@@ -1,0 +1,9 @@
+{
+	"Author": "Cytraen",
+	"Name": "Combat Cursor Containment",
+	"Punchline": "Keep your mouse cursor contained during combat!",
+	"Description": "Automatically changes the 'limit mouse operation to game window' setting when entering/exiting combat.",
+	"InternalName": "CombatCursorContainment",
+	"ApplicableVersion": "any",
+	"Tags": []
+}
