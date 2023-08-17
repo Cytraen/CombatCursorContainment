@@ -14,7 +14,7 @@ public class ConfigWindow : Window, IDisposable
 		ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
 		ImGuiWindowFlags.NoScrollWithMouse)
 	{
-		Size = new Vector2(300, 75);
+		Size = new Vector2(300, 170);
 		SizeCondition = ImGuiCond.Always;
 
 		Plugin = plugin;
@@ -28,10 +28,39 @@ public class ConfigWindow : Window, IDisposable
 
 	public override void Draw()
 	{
-		var configValue = Configuration.EnablePlugin;
-		if (ImGui.Checkbox("Enable CCC", ref configValue))
+		var enableLocking = Configuration.EnableLocking;
+		var disableOutsideDuty = Configuration.DoNotLockIfOutsideDuty;
+		var disableWeaponSheathed = Configuration.DoNotLockIfWeaponSheathed;
+		var disableWhenMounted = Configuration.DoNotLockIfMounted;
+		var disableWhenHandLand = Configuration.DoNotLockIfGathererCrafter;
+
+		if (ImGui.Checkbox("Enable mouse lock in combat", ref enableLocking))
 		{
-			Configuration.EnablePlugin = configValue;
+			Configuration.EnableLocking = enableLocking;
+			Configuration.Save();
+			Plugin.UpdateSetting();
+		}
+		else if (ImGui.Checkbox("Disable locking mouse outside duties", ref disableOutsideDuty))
+		{
+			Configuration.DoNotLockIfOutsideDuty = disableOutsideDuty;
+			Configuration.Save();
+			Plugin.UpdateSetting();
+		}
+		if (ImGui.Checkbox("Disable locking mouse if weapon sheathed", ref disableWeaponSheathed))
+		{
+			Configuration.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
+			Configuration.Save();
+			Plugin.UpdateSetting();
+		}
+		if (ImGui.Checkbox("Disable locking mouse if on a mount", ref disableWhenMounted))
+		{
+			Configuration.DoNotLockIfMounted = disableWhenMounted;
+			Configuration.Save();
+			Plugin.UpdateSetting();
+		}
+		if (ImGui.Checkbox("Disable locking mouse if on a DoH/DoL class", ref disableWhenHandLand))
+		{
+			Configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
 			Configuration.Save();
 			Plugin.UpdateSetting();
 		}

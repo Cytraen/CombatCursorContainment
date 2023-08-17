@@ -8,7 +8,15 @@ namespace CombatCursorContainment
 	{
 		public int Version { get; set; } = 0;
 
-		public bool EnablePlugin { get; set; } = true;
+		public bool EnableLocking { get; set; } = true;
+
+		public bool DoNotLockIfOutsideDuty { get; set; } = false;
+
+		public bool DoNotLockIfWeaponSheathed { get; set; } = false;
+
+		public bool DoNotLockIfMounted { get; set; } = false;
+
+		public bool DoNotLockIfGathererCrafter { get; set; } = false;
 
 		[NonSerialized]
 		private DalamudPluginInterface? PluginInterface;
