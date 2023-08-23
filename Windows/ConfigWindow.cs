@@ -11,10 +11,9 @@ public class ConfigWindow : Window, IDisposable
 
 	public ConfigWindow(Plugin plugin) : base(
 		"Combat Cursor Containment Settings",
-		ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-		ImGuiWindowFlags.NoScrollWithMouse)
+		ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
 	{
-		Size = new Vector2(300, 170);
+		Size = new Vector2(280, 220);
 		SizeCondition = ImGuiCond.Always;
 
 		Plugin = plugin;
@@ -29,36 +28,46 @@ public class ConfigWindow : Window, IDisposable
 	public override void Draw()
 	{
 		var enableLocking = Configuration.EnableLocking;
+		var disableWhenDead = Configuration.DoNotLockIfDead;
 		var disableOutsideDuty = Configuration.DoNotLockIfOutsideDuty;
 		var disableWeaponSheathed = Configuration.DoNotLockIfWeaponSheathed;
 		var disableWhenMounted = Configuration.DoNotLockIfMounted;
 		var disableWhenHandLand = Configuration.DoNotLockIfGathererCrafter;
 
-		if (ImGui.Checkbox("Enable mouse lock in combat", ref enableLocking))
+		if (ImGui.Checkbox("Automatically lock mouse in combat", ref enableLocking))
 		{
 			Configuration.EnableLocking = enableLocking;
 			Configuration.Save();
 			Plugin.UpdateSetting();
 		}
-		else if (ImGui.Checkbox("Disable locking mouse outside duties", ref disableOutsideDuty))
+		ImGui.Indent();
+		ImGui.Text("Except while:");
+		ImGui.Indent();
+		if (ImGui.Checkbox("Dead", ref disableWhenDead))
+		{
+			Configuration.DoNotLockIfDead = disableWhenDead;
+			Configuration.Save();
+			Plugin.UpdateSetting();
+		}
+		if (ImGui.Checkbox("Not in a duty", ref disableOutsideDuty))
 		{
 			Configuration.DoNotLockIfOutsideDuty = disableOutsideDuty;
 			Configuration.Save();
 			Plugin.UpdateSetting();
 		}
-		if (ImGui.Checkbox("Disable locking mouse if weapon sheathed", ref disableWeaponSheathed))
+		if (ImGui.Checkbox("Weapon is sheathed", ref disableWeaponSheathed))
 		{
 			Configuration.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
 			Configuration.Save();
 			Plugin.UpdateSetting();
 		}
-		if (ImGui.Checkbox("Disable locking mouse if on a mount", ref disableWhenMounted))
+		if (ImGui.Checkbox("On a mount", ref disableWhenMounted))
 		{
 			Configuration.DoNotLockIfMounted = disableWhenMounted;
 			Configuration.Save();
 			Plugin.UpdateSetting();
 		}
-		if (ImGui.Checkbox("Disable locking mouse if on a DoH/DoL class", ref disableWhenHandLand))
+		if (ImGui.Checkbox("On a DoH/DoL class", ref disableWhenHandLand))
 		{
 			Configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
 			Configuration.Save();

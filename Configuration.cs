@@ -10,6 +10,8 @@ namespace CombatCursorContainment
 
 		public bool EnableLocking { get; set; } = true;
 
+		public bool DoNotLockIfDead { get; set; } = false;
+
 		public bool DoNotLockIfOutsideDuty { get; set; } = false;
 
 		public bool DoNotLockIfWeaponSheathed { get; set; } = false;

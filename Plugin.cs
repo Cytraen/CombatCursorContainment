@@ -83,6 +83,10 @@ namespace CombatCursorContainment
 			{
 				return false;
 			}
+			if (Configuration.DoNotLockIfDead && ClientState.LocalPlayer?.IsDead == true)
+			{
+				return false;
+			}
 			if (Configuration.DoNotLockIfOutsideDuty && !(Condition[ConditionFlag.BoundByDuty] || Condition[ConditionFlag.BoundByDuty56] || Condition[ConditionFlag.BoundByDuty95] || Condition[ConditionFlag.BoundToDuty97]))
 			{
 				return false;
@@ -95,7 +99,7 @@ namespace CombatCursorContainment
 			{
 				return false;
 			}
-			if (Configuration.DoNotLockIfGathererCrafter && ClientState.LocalPlayer?.ClassJob?.GameData?.Role == 0)
+			if (Configuration.DoNotLockIfGathererCrafter && ClientState.LocalPlayer?.ClassJob.GameData?.Role == 0)
 			{
 				return false;
 			}
