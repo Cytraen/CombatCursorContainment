@@ -5,8 +5,10 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Command;
 using Dalamud.Game.Config;
+using Dalamud.Game.Gui;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 namespace CombatCursorContainment
@@ -24,7 +26,17 @@ namespace CombatCursorContainment
 		private Condition Condition { get; }
 		private GameConfig GameConfig { get; }
 		private ConfigWindow ConfigWindow { get; }
+		private ChatGui ChatGui { get; }
 		public Configuration Configuration { get; }
+
+		public bool MouseLimit
+		{
+			get { return GameConfig.System.GetBool(SystemConfigOption.MouseOpeLimit.ToString()); }
+			private set
+			{
+				GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
+			}
+		}
 
 		public Plugin(
 			[RequiredVersion("1.0")] Framework framework,
@@ -32,7 +44,8 @@ namespace CombatCursorContainment
 			[RequiredVersion("1.0")] CommandManager commandManager,
 			[RequiredVersion("1.0")] ClientState clientState,
 			[RequiredVersion("1.0")] Condition condition,
-			[RequiredVersion("1.0")] GameConfig gameConfig)
+			[RequiredVersion("1.0")] GameConfig gameConfig,
+			[RequiredVersion("1.0")] ChatGui chatGui)
 		{
 			Framework = framework;
 			PluginInterface = pluginInterface;
@@ -40,6 +53,7 @@ namespace CombatCursorContainment
 			ClientState = clientState;
 			Condition = condition;
 			GameConfig = gameConfig;
+			ChatGui = chatGui;
 
 			Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 			Configuration.Initialize(PluginInterface);
@@ -50,7 +64,9 @@ namespace CombatCursorContainment
 
 			CommandManager.AddHandler(ConfigWindowCommandName, new CommandInfo(OnConfigWindowCommand)
 			{
-				HelpMessage = "Opens the Combat Cursor Containment config window."
+				HelpMessage = "Opens the Combat Cursor Containment config window.\n" +
+				"/ccc <1|on> → Enables locking cursor during combat.\n" +
+				"/ccc <0|off> → Disables locking cursor during combat."
 			});
 
 			PluginInterface.UiBuilder.Draw += DrawUI;
@@ -74,7 +90,12 @@ namespace CombatCursorContainment
 
 		private void MouseTick(Framework framework)
 		{
-			SetMouseLimit(ShouldLockMouse());
+			var shouldLock = ShouldLockMouse();
+			if (shouldLock != MouseLimit)
+			{
+				PluginLog.Debug($"Toggled mouse lock {(shouldLock ? "on" : "off")}");
+				MouseLimit = shouldLock;
+			}
 		}
 
 		private bool ShouldLockMouse()
@@ -106,11 +127,6 @@ namespace CombatCursorContainment
 			return true;
 		}
 
-		private void SetMouseLimit(bool value)
-		{
-			GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
-		}
-
 		public void UpdateSetting()
 		{
 			if (Configuration.EnableLocking)
@@ -137,7 +153,40 @@ namespace CombatCursorContainment
 
 		private void OnConfigWindowCommand(string command, string args)
 		{
-			ConfigWindow.IsOpen = true;
+			switch (args)
+			{
+				case "":
+					ConfigWindow.IsOpen = true;
+					break;
+
+				case "on" or "1":
+					if (Configuration.EnableLocking)
+					{
+						ChatGui.Print("Combat Cursor Containment was already enabled.");
+					}
+					else
+					{
+						ChatGui.Print("Combat Cursor Containment now enabled.");
+						Configuration.EnableLocking = true;
+					}
+					break;
+
+				case "off" or "0":
+					if (Configuration.EnableLocking)
+					{
+						ChatGui.Print("Combat Cursor Containment now disabled.");
+						Configuration.EnableLocking = false;
+					}
+					else
+					{
+						ChatGui.Print("Combat Cursor Containment was already disabled.");
+					}
+					break;
+
+				default:
+					ChatGui.PrintError($"Unknown command: '/ccc {args}'");
+					break;
+			}
 		}
 
 		private void DrawUI()

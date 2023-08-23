@@ -1,3 +1,4 @@
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System.Numerics;
@@ -13,7 +14,7 @@ public class ConfigWindow : Window, IDisposable
 		"Combat Cursor Containment Settings",
 		ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
 	{
-		Size = new Vector2(280, 220);
+		Size = new Vector2(280, 240);
 		SizeCondition = ImGuiCond.Always;
 
 		Plugin = plugin;
@@ -33,12 +34,19 @@ public class ConfigWindow : Window, IDisposable
 		var disableWeaponSheathed = Configuration.DoNotLockIfWeaponSheathed;
 		var disableWhenMounted = Configuration.DoNotLockIfMounted;
 		var disableWhenHandLand = Configuration.DoNotLockIfGathererCrafter;
+		ImGui.Text($"Mouse cursor is currently: {(Plugin.MouseLimit ? "locked" : "unlocked")}");
 
 		if (ImGui.Checkbox("Automatically lock mouse in combat", ref enableLocking))
 		{
 			Configuration.EnableLocking = enableLocking;
 			Configuration.Save();
 			Plugin.UpdateSetting();
+		}
+		ImGuiComponents.HelpMarker($"This will automatically lock/unlock the cursor when the conditions for doing so are met.\n" +
+			$"You will be unable to toggle the cursor lock manually using the in-game setting while this is enabled.");
+		if (!enableLocking)
+		{
+			ImGui.BeginDisabled();
 		}
 		ImGui.Indent();
 		ImGui.Text("Except while:");
@@ -72,6 +80,10 @@ public class ConfigWindow : Window, IDisposable
 			Configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
 			Configuration.Save();
 			Plugin.UpdateSetting();
+		}
+		if (!enableLocking)
+		{
+			ImGui.EndDisabled();
 		}
 	}
 }
