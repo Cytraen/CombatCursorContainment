@@ -65,8 +65,8 @@ namespace CombatCursorContainment
 			CommandManager.AddHandler(ConfigWindowCommandName, new CommandInfo(OnConfigWindowCommand)
 			{
 				HelpMessage = "Opens the Combat Cursor Containment config window.\n" +
-				"/ccc <1|on> → Enables locking cursor during combat.\n" +
-				"/ccc <0|off> → Disables locking cursor during combat."
+				"/ccc <enable|on|1> → Enables locking cursor during combat.\n" +
+				"/ccc <disable|off|0> → Disables locking cursor during combat."
 			});
 
 			PluginInterface.UiBuilder.Draw += DrawUI;
@@ -78,14 +78,15 @@ namespace CombatCursorContainment
 			}
 		}
 
-		private void EnablePlugin()
+		internal void EnablePlugin()
 		{
 			Framework.Update += MouseTick;
 		}
 
-		private void DisablePlugin()
+		internal void DisablePlugin()
 		{
 			Framework.Update -= MouseTick;
+			MouseLimit = false;
 		}
 
 		private void MouseTick(Framework framework)
@@ -101,6 +102,10 @@ namespace CombatCursorContainment
 		private bool ShouldLockMouse()
 		{
 			if (!Condition[ConditionFlag.InCombat])
+			{
+				return false;
+			}
+			if (Configuration.DoNotLockDuringCutscene && (Condition[ConditionFlag.OccupiedInCutSceneEvent] || Condition[ConditionFlag.WatchingCutscene]))
 			{
 				return false;
 			}
@@ -127,28 +132,16 @@ namespace CombatCursorContainment
 			return true;
 		}
 
-		public void UpdateSetting()
-		{
-			if (Configuration.EnableLocking)
-			{
-				EnablePlugin();
-			}
-			else
-			{
-				DisablePlugin();
-			}
-		}
-
 		public void Dispose()
 		{
 			WindowSystem.RemoveAllWindows();
 			ConfigWindow.Dispose();
 			CommandManager.RemoveHandler(ConfigWindowCommandName);
 
-			if (Configuration.EnableLocking)
-			{
-				DisablePlugin();
-			}
+			PluginInterface.UiBuilder.Draw -= DrawUI;
+			PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
+
+			DisablePlugin();
 		}
 
 		private void OnConfigWindowCommand(string command, string args)
@@ -156,10 +149,10 @@ namespace CombatCursorContainment
 			switch (args)
 			{
 				case "":
-					ConfigWindow.IsOpen = true;
+					DrawConfigUI();
 					break;
 
-				case "on" or "1":
+				case "enable" or "on" or "1":
 					if (Configuration.EnableLocking)
 					{
 						ChatGui.Print("Combat Cursor Containment was already enabled.");
@@ -168,14 +161,18 @@ namespace CombatCursorContainment
 					{
 						ChatGui.Print("Combat Cursor Containment now enabled.");
 						Configuration.EnableLocking = true;
+						Configuration.Save();
+						EnablePlugin();
 					}
 					break;
 
-				case "off" or "0":
+				case "disable" or "off" or "0":
 					if (Configuration.EnableLocking)
 					{
 						ChatGui.Print("Combat Cursor Containment now disabled.");
 						Configuration.EnableLocking = false;
+						Configuration.Save();
+						DisablePlugin();
 					}
 					else
 					{
@@ -184,7 +181,7 @@ namespace CombatCursorContainment
 					break;
 
 				default:
-					ChatGui.PrintError($"Unknown command: '/ccc {args}'");
+					ChatGui.PrintError($"Unknown command: '/{command} {args}'");
 					break;
 			}
 		}

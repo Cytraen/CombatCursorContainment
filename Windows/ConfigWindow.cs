@@ -12,11 +12,9 @@ public class ConfigWindow : Window, IDisposable
 
 	public ConfigWindow(Plugin plugin) : base(
 		"Combat Cursor Containment Settings",
-		ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+		ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
 	{
-		Size = new Vector2(280, 240);
-		SizeCondition = ImGuiCond.Always;
-
+		Size = new Vector2(0, 0);
 		Plugin = plugin;
 		Configuration = plugin.Configuration;
 	}
@@ -31,6 +29,7 @@ public class ConfigWindow : Window, IDisposable
 		var enableLocking = Configuration.EnableLocking;
 		var disableWhenDead = Configuration.DoNotLockIfDead;
 		var disableOutsideDuty = Configuration.DoNotLockIfOutsideDuty;
+		var disableDuringCutscene = Configuration.DoNotLockDuringCutscene;
 		var disableWeaponSheathed = Configuration.DoNotLockIfWeaponSheathed;
 		var disableWhenMounted = Configuration.DoNotLockIfMounted;
 		var disableWhenHandLand = Configuration.DoNotLockIfGathererCrafter;
@@ -39,51 +38,57 @@ public class ConfigWindow : Window, IDisposable
 		if (ImGui.Checkbox("Automatically lock mouse in combat", ref enableLocking))
 		{
 			Configuration.EnableLocking = enableLocking;
+			if (enableLocking)
+			{
+				Plugin.EnablePlugin();
+			}
+			else
+			{
+				Plugin.DisablePlugin();
+			}
 			Configuration.Save();
-			Plugin.UpdateSetting();
 		}
 		ImGuiComponents.HelpMarker($"This will automatically lock/unlock the cursor when the conditions for doing so are met.\n" +
 			$"You will be unable to toggle the cursor lock manually using the in-game setting while this is enabled.");
-		if (!enableLocking)
+		if (enableLocking)
 		{
-			ImGui.BeginDisabled();
-		}
-		ImGui.Indent();
-		ImGui.Text("Except while:");
-		ImGui.Indent();
-		if (ImGui.Checkbox("Dead", ref disableWhenDead))
-		{
-			Configuration.DoNotLockIfDead = disableWhenDead;
-			Configuration.Save();
-			Plugin.UpdateSetting();
-		}
-		if (ImGui.Checkbox("Not in a duty", ref disableOutsideDuty))
-		{
-			Configuration.DoNotLockIfOutsideDuty = disableOutsideDuty;
-			Configuration.Save();
-			Plugin.UpdateSetting();
-		}
-		if (ImGui.Checkbox("Weapon is sheathed", ref disableWeaponSheathed))
-		{
-			Configuration.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
-			Configuration.Save();
-			Plugin.UpdateSetting();
-		}
-		if (ImGui.Checkbox("On a mount", ref disableWhenMounted))
-		{
-			Configuration.DoNotLockIfMounted = disableWhenMounted;
-			Configuration.Save();
-			Plugin.UpdateSetting();
-		}
-		if (ImGui.Checkbox("On a DoH/DoL class", ref disableWhenHandLand))
-		{
-			Configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
-			Configuration.Save();
-			Plugin.UpdateSetting();
-		}
-		if (!enableLocking)
-		{
-			ImGui.EndDisabled();
+			ImGui.Indent();
+			ImGui.Text("Except while:");
+			ImGui.Indent();
+			if (ImGui.Checkbox("Dead", ref disableWhenDead))
+			{
+				Configuration.DoNotLockIfDead = disableWhenDead;
+				Configuration.Save();
+			}
+			if (ImGui.Checkbox("Not in a duty", ref disableOutsideDuty))
+			{
+				Configuration.DoNotLockIfOutsideDuty = disableOutsideDuty;
+				Configuration.Save();
+			}
+			ImGuiComponents.HelpMarker($"In other words, checking this makes your cursor only lock during duties.");
+			if (ImGui.Checkbox("In a cutscene", ref disableDuringCutscene))
+			{
+				Configuration.DoNotLockDuringCutscene = disableDuringCutscene;
+				Configuration.Save();
+			}
+			ImGuiComponents.HelpMarker($"There are some solo duties that have cutscenes between fights,\n" +
+				$"and will consider you in combat during those cutscenes.\n" +
+				$"This does not work for mid-fight cutscenes like in some raids and trials.");
+			if (ImGui.Checkbox("Weapon is sheathed", ref disableWeaponSheathed))
+			{
+				Configuration.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
+				Configuration.Save();
+			}
+			if (ImGui.Checkbox("On a mount", ref disableWhenMounted))
+			{
+				Configuration.DoNotLockIfMounted = disableWhenMounted;
+				Configuration.Save();
+			}
+			if (ImGui.Checkbox("On a DoH/DoL class", ref disableWhenHandLand))
+			{
+				Configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
+				Configuration.Save();
+			}
 		}
 	}
 }
