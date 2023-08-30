@@ -1,0 +1,11 @@
+name: Combat Cursor Containment
+author: Cytraen
+punchline: Keep your mouse cursor contained during combat!
+description: Automatically changes the 'limit mouse operation to game window' setting when entering/exiting combat.
+repo_url: https://github.com/Cytraen/CombatCursorContainment
+accepts_feedback: true
+tags:
+  - utility
+category_tags:
+  - Utility
+changelog: Improve performance, mostly outside of combat.

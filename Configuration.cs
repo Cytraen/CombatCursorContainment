@@ -1,38 +1,36 @@
 using Dalamud.Configuration;
 using Dalamud.Plugin;
 
-namespace CombatCursorContainment
+namespace CombatCursorContainment;
+
+[Serializable]
+public class Configuration : IPluginConfiguration
 {
-	[Serializable]
-	public class Configuration : IPluginConfiguration
+	[NonSerialized] private DalamudPluginInterface? _pluginInterface;
+
+	public int Version { get; set; } = 0;
+
+	public bool EnableLocking { get; set; } = true;
+
+	public bool DoNotLockIfDead { get; set; } = false;
+
+	public bool DoNotLockIfOutsideDuty { get; set; } = false;
+
+	public bool DoNotLockDuringCutscene { get; set; } = false;
+
+	public bool DoNotLockIfWeaponSheathed { get; set; } = false;
+
+	public bool DoNotLockIfMounted { get; set; } = false;
+
+	public bool DoNotLockIfGathererCrafter { get; set; } = false;
+
+	public void Initialize(DalamudPluginInterface pluginInterface)
 	{
-		public int Version { get; set; } = 0;
+		_pluginInterface = pluginInterface;
+	}
 
-		public bool EnableLocking { get; set; } = true;
-
-		public bool DoNotLockIfDead { get; set; } = false;
-
-		public bool DoNotLockIfOutsideDuty { get; set; } = false;
-
-		public bool DoNotLockDuringCutscene { get; set; } = false;
-
-		public bool DoNotLockIfWeaponSheathed { get; set; } = false;
-
-		public bool DoNotLockIfMounted { get; set; } = false;
-
-		public bool DoNotLockIfGathererCrafter { get; set; } = false;
-
-		[NonSerialized]
-		private DalamudPluginInterface? PluginInterface;
-
-		public void Initialize(DalamudPluginInterface pluginInterface)
-		{
-			PluginInterface = pluginInterface;
-		}
-
-		public void Save()
-		{
-			PluginInterface!.SavePluginConfig(this);
-		}
+	public void Save()
+	{
+		_pluginInterface!.SavePluginConfig(this);
 	}
 }

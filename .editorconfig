@@ -8,5 +8,8 @@ indent_style = tab
 [**.cs]
 indent_size = 4
 
-[**.{csproj,json,xml}]
+[**.{csproj,json,xml,yaml}]
 indent_size = 2
+
+[**.yaml]
+indent_style = space

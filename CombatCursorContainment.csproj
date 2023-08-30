@@ -15,18 +15,22 @@
 
 	<PropertyGroup>
 		<Authors>Cytraen</Authors>
-		<VersionPrefix>0.1.1</VersionPrefix>
+		<VersionPrefix>1.0.0</VersionPrefix>
 		<RepositoryUrl>https://github.com/Cytraen/CombatCursorContainment/</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 	</PropertyGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<None Update="icon.png" CopyToOutputDirectory="PreserveNewest" TargetPath="images\%(Filename)%(Extension)" />
+	</ItemGroup>
 
 	<PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
 		<DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="DalamudPackager" Version="2.1.11" />
+		<PackageReference Include="DalamudPackager" Version="2.1.11" />
 	</ItemGroup>
 
 	<ItemGroup>
