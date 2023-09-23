@@ -7,16 +7,11 @@ namespace CombatCursorContainment.Windows;
 
 internal class ConfigWindow : Window, IDisposable
 {
-	private readonly Configuration _configuration;
-	private readonly MouseLock _lock;
-
-	internal ConfigWindow(MouseLock mouseLock, Configuration configuration) : base(
+	internal ConfigWindow() : base(
 		"Combat Cursor Containment Settings",
 		ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
 	{
 		Size = new Vector2(0, 0);
-		_lock = mouseLock;
-		_configuration = configuration;
 	}
 
 	public void Dispose()
@@ -27,13 +22,13 @@ internal class ConfigWindow : Window, IDisposable
 	public override void Draw()
 	{
 		var changed = false;
-		var enableLocking = _configuration.EnableLocking;
-		var disableWhenDead = _configuration.DoNotLockIfDead;
-		var disableOutsideDuty = _configuration.DoNotLockIfOutsideDuty;
-		var disableDuringCutscene = _configuration.DoNotLockDuringCutscene;
-		var disableWeaponSheathed = _configuration.DoNotLockIfWeaponSheathed;
-		var disableWhenMounted = _configuration.DoNotLockIfMounted;
-		var disableWhenHandLand = _configuration.DoNotLockIfGathererCrafter;
+		var enableLocking = Services.Config.EnableLocking;
+		var disableWhenDead = Services.Config.DoNotLockIfDead;
+		var disableOutsideDuty = Services.Config.DoNotLockIfOutsideDuty;
+		var disableDuringCutscene = Services.Config.DoNotLockDuringCutscene;
+		var disableWeaponSheathed = Services.Config.DoNotLockIfWeaponSheathed;
+		var disableWhenMounted = Services.Config.DoNotLockIfMounted;
+		var disableWhenHandLand = Services.Config.DoNotLockIfGathererCrafter;
 
 		ImGui.AlignTextToFramePadding();
 		ImGui.Text("Mouse cursor is currently: ");
@@ -41,15 +36,15 @@ internal class ConfigWindow : Window, IDisposable
 		if (enableLocking)
 		{
 			ImGui.SameLine(0, ImGui.GetStyle().FramePadding.X);
-			ImGui.Text(_lock.GetMouseLimit() ? "locked" : "unlocked");
+			ImGui.Text(MouseLock.GetMouseLimit() ? "locked" : "unlocked");
 			ImGui.SameLine(0, ImGui.GetStyle().FramePadding.X);
 			ImGui.Spacing();
 		}
 		else
 		{
 			ImGui.SameLine(0, 0);
-			if (ImGui.Button(_lock.GetMouseLimit() ? "locked" : "unlocked"))
-				_lock.SetMouseLimit(!_lock.GetMouseLimit());
+			if (ImGui.Button(MouseLock.GetMouseLimit() ? "locked" : "unlocked"))
+				MouseLock.SetMouseLimit(!MouseLock.GetMouseLimit());
 		}
 		ImGuiComponents.HelpMarker(
 			"The game's cursor lock will not do anything if the game window is not focused (i.e. if you are 'alt-tabbed' out of the game.)\n" +
@@ -57,12 +52,12 @@ internal class ConfigWindow : Window, IDisposable
 
 		if (changed |= ImGui.Checkbox("Automatically lock mouse in combat", ref enableLocking))
 		{
-			_configuration.EnableLocking = enableLocking;
+			Services.Config.EnableLocking = enableLocking;
 
 			if (enableLocking)
-				_lock.EnableLock();
+				MouseLock.EnableMouseAutoLock();
 			else
-				_lock.DisableLock();
+				MouseLock.DisableMouseAutoLock();
 		}
 		ImGuiComponents.HelpMarker(
 			"This will automatically lock/unlock the cursor when the conditions for doing so are met.\n" +
@@ -75,28 +70,28 @@ internal class ConfigWindow : Window, IDisposable
 		ImGui.Indent();
 
 		if (changed |= ImGui.Checkbox("Dead", ref disableWhenDead))
-			_configuration.DoNotLockIfDead = disableWhenDead;
+			Services.Config.DoNotLockIfDead = disableWhenDead;
 
 		if (changed |= ImGui.Checkbox("Not in a duty", ref disableOutsideDuty))
-			_configuration.DoNotLockIfOutsideDuty = disableOutsideDuty;
+			Services.Config.DoNotLockIfOutsideDuty = disableOutsideDuty;
 		ImGuiComponents.HelpMarker("In other words, checking this makes your cursor lock only during duties.");
 
 		if (changed |= ImGui.Checkbox("In a cutscene", ref disableDuringCutscene))
-			_configuration.DoNotLockDuringCutscene = disableDuringCutscene;
+			Services.Config.DoNotLockDuringCutscene = disableDuringCutscene;
 		ImGuiComponents.HelpMarker(
 			"This is for solo duties that have cutscenes, as the game considers you to be 'in combat' during them.\n" +
 			"This does not work for mid-fight cutscenes in group duties, like in some raids and trials.");
 
 		if (changed |= ImGui.Checkbox("Weapon is sheathed", ref disableWeaponSheathed))
-			_configuration.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
+			Services.Config.DoNotLockIfWeaponSheathed = disableWeaponSheathed;
 
 		if (changed |= ImGui.Checkbox("On a mount", ref disableWhenMounted))
-			_configuration.DoNotLockIfMounted = disableWhenMounted;
+			Services.Config.DoNotLockIfMounted = disableWhenMounted;
 
 		if (changed |= ImGui.Checkbox("On a DoH/DoL class", ref disableWhenHandLand))
-			_configuration.DoNotLockIfGathererCrafter = disableWhenHandLand;
+			Services.Config.DoNotLockIfGathererCrafter = disableWhenHandLand;
 
 		if (changed)
-			_configuration.Save();
+			Services.Config.Save();
 	}
 }

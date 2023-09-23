@@ -8,4 +8,6 @@ tags:
   - utility
 category_tags:
   - Utility
-changelog: Improve performance, mostly outside of combat.
+changelog: |-
+  - Fix "Not in a duty" setting doing the opposite of what it should have been.
+  - Fix being in queue counting as being in a duty.

@@ -1,5 +1,4 @@
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Config;
@@ -7,120 +6,101 @@ using Dalamud.Logging;
 
 namespace CombatCursorContainment;
 
-internal class MouseLock
+internal static class MouseLock
 {
-	private readonly ClientState _clientState;
-	private readonly Condition _condition;
-	private readonly Configuration _config;
-	private readonly Framework _framework;
-	private readonly GameConfig _gameConfig;
-
-	internal MouseLock(Framework framework, ClientState clientState, Condition condition, GameConfig gameConfig,
-		Configuration config)
+	internal static bool GetMouseLimit()
 	{
-		_framework = framework;
-		_clientState = clientState;
-		_condition = condition;
-		_gameConfig = gameConfig;
-		_config = config;
+		return Services.GameConfig.System.GetBool(SystemConfigOption.MouseOpeLimit.ToString());
 	}
 
-	internal bool GetMouseLimit()
-	{
-		return _gameConfig.System.GetBool(SystemConfigOption.MouseOpeLimit.ToString());
-	}
-
-	internal void SetMouseLimit(bool value)
+	internal static void SetMouseLimit(bool value)
 	{
 		PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
-		_gameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
+		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
 	}
 
-	internal void EnableLock()
+	internal static void EnableMouseAutoLock()
 	{
-		_condition.ConditionChange += OnConditionChange;
-		OnConditionChange(ConditionFlag.InCombat, _condition[ConditionFlag.InCombat]);
+		Services.Condition.ConditionChange += OnConditionChange;
+		OnConditionChange(ConditionFlag.InCombat, Services.Condition[ConditionFlag.InCombat]);
 	}
 
-	internal void DisableLock()
+	internal static void DisableMouseAutoLock()
 	{
-		_condition.ConditionChange -= OnConditionChange;
-		_framework.Update -= MouseLockTick;
+		Services.Condition.ConditionChange -= OnConditionChange;
+		Services.Framework.Update -= CombatFrameworkTick;
 		if (GetMouseLimit()) SetMouseLimit(false);
 	}
 
-	private void OnConditionChange(ConditionFlag flag, bool value)
+	private static void OnConditionChange(ConditionFlag flag, bool value)
 	{
 		if (flag != ConditionFlag.InCombat) return;
 		if (value)
 		{
-			_framework.Update += MouseLockTick;
+			Services.Framework.Update += CombatFrameworkTick;
 		}
 		else
 		{
-			_framework.Update -= MouseLockTick;
-			_framework.Update += MouseUnlockTick;
+			Services.Framework.Update -= CombatFrameworkTick;
+			Services.Framework.Update += PostCombatCleanupTick;
 		}
 	}
 
-	private void MouseLockTick(Framework framework)
+	private static void CombatFrameworkTick(Framework framework)
 	{
 		var shouldLock = ShouldLockMouse();
 		if (shouldLock == GetMouseLimit()) return;
 		SetMouseLimit(shouldLock);
 	}
 
-	private void MouseUnlockTick(Framework framework)
+	private static void PostCombatCleanupTick(Framework framework)
 	{
-		_framework.Update -= MouseUnlockTick;
 		if (GetMouseLimit()) SetMouseLimit(false);
+		framework.Update -= PostCombatCleanupTick;
 	}
 
-	private bool ShouldLockMouse()
+	private static bool ShouldLockMouse()
 	{
-		if (_config.DoNotLockDuringCutscene && IsInCutscene()) return false;
-		if (_config.DoNotLockIfDead && IsDead()) return false;
-		if (_config.DoNotLockIfOutsideDuty && IsInDuty()) return false;
-		if (_config.DoNotLockIfWeaponSheathed && !IsWeaponOut()) return false;
-		if (_config.DoNotLockIfMounted && IsMounted()) return false;
-		if (_config.DoNotLockIfGathererCrafter && IsCraftingJob()) return false;
+		if (Services.Config.DoNotLockDuringCutscene && IsInCutscene()) return false;
+		if (Services.Config.DoNotLockIfDead && IsDead()) return false;
+		if (Services.Config.DoNotLockIfOutsideDuty && !IsInDuty()) return false;
+		if (Services.Config.DoNotLockIfWeaponSheathed && !IsWeaponOut()) return false;
+		if (Services.Config.DoNotLockIfMounted && IsMounted()) return false;
+		if (Services.Config.DoNotLockIfGathererCrafter && IsCraftingJob()) return false;
 		return true;
 	}
 
-	private bool IsInCutscene()
+	private static bool IsInCutscene()
 	{
-		return _condition[ConditionFlag.OccupiedInCutSceneEvent]
-			   || _condition[ConditionFlag.WatchingCutscene];
+		return Services.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+			   || Services.Condition[ConditionFlag.WatchingCutscene];
 	}
 
-	private bool IsDead()
+	private static bool IsDead()
 	{
-		return _clientState.LocalPlayer?.IsDead == true;
+		return Services.ClientState.LocalPlayer?.IsDead == true;
 	}
 
-	private bool IsInDuty()
+	private static bool IsInDuty()
 	{
-		return _condition[ConditionFlag.BoundByDuty]
-			   || _condition[ConditionFlag.BoundByDuty56]
-			   || _condition[ConditionFlag.BoundByDuty95]
-			   || _condition[ConditionFlag.BoundToDuty97];
+		return Services.DutyState.IsDutyStarted;
 	}
 
-	private bool IsWeaponOut()
+	private static bool IsWeaponOut()
 	{
-		return _clientState.LocalPlayer?.StatusFlags.HasFlag(StatusFlags.WeaponOut) == true;
+		return Services.ClientState.LocalPlayer?.StatusFlags.HasFlag(StatusFlags.WeaponOut) == true;
 	}
 
-	private bool IsMounted()
+	private static bool IsMounted()
 	{
-		return _condition[ConditionFlag.Mounted]
-			   || _condition[ConditionFlag.Mounted2]
-			   || _condition[ConditionFlag.Mounting]
-			   || _condition[ConditionFlag.Mounting71];
+		return Services.Condition[ConditionFlag.Mounted]
+			   || Services.Condition[ConditionFlag.Mounted2]
+			   || Services.Condition[ConditionFlag.Mounting]
+			   || Services.Condition[ConditionFlag.Mounting71];
 	}
 
-	private bool IsCraftingJob()
+	private static bool IsCraftingJob()
 	{
-		return _clientState.LocalPlayer?.ClassJob.GameData?.Role == 0;
+		return Services.ClientState.LocalPlayer?.ClassJob.GameData?.Role == 0;
 	}
 }
