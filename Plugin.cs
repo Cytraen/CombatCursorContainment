@@ -35,8 +35,6 @@ internal sealed class Plugin : IDalamudPlugin
 		if (Services.Config.EnableLocking) MouseLock.EnableMouseAutoLock();
 	}
 
-	public string Name => "Combat Cursor Containment";
-
 	public void Dispose()
 	{
 		MouseLock.DisableMouseAutoLock();

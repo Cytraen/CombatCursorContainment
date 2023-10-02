@@ -1,8 +1,7 @@
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Config;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace CombatCursorContainment;
 
@@ -15,7 +14,7 @@ internal static class MouseLock
 
 	internal static void SetMouseLimit(bool value)
 	{
-		PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
+		Services.PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
 		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
 	}
 
@@ -46,14 +45,14 @@ internal static class MouseLock
 		}
 	}
 
-	private static void CombatFrameworkTick(Framework framework)
+	private static void CombatFrameworkTick(IFramework framework)
 	{
 		var shouldLock = ShouldLockMouse();
 		if (shouldLock == GetMouseLimit()) return;
 		SetMouseLimit(shouldLock);
 	}
 
-	private static void PostCombatCleanupTick(Framework framework)
+	private static void PostCombatCleanupTick(IFramework framework)
 	{
 		if (GetMouseLimit()) SetMouseLimit(false);
 		framework.Update -= PostCombatCleanupTick;

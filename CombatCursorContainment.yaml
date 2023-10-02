@@ -9,5 +9,4 @@ tags:
 category_tags:
   - Utility
 changelog: |-
-  - Fix "Not in a duty" setting doing the opposite of what it should have been.
-  - Fix being in queue counting as being in a duty.
+  - Update for API v9.
