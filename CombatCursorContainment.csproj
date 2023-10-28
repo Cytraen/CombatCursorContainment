@@ -15,7 +15,7 @@
 
 	<PropertyGroup>
 		<Authors>Cytraen</Authors>
-		<VersionPrefix>1.0.2</VersionPrefix>
+		<VersionPrefix>1.0.3</VersionPrefix>
 		<RepositoryUrl>https://github.com/Cytraen/CombatCursorContainment/</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>

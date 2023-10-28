@@ -14,8 +14,9 @@ internal static class MouseLock
 
 	internal static void SetMouseLimit(bool value)
 	{
+		if (GetMouseLimit() == value) return;
 		Services.PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
-		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value ? 1u : 0u);
+		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value);
 	}
 
 	internal static void EnableMouseAutoLock()
@@ -28,34 +29,26 @@ internal static class MouseLock
 	{
 		Services.Condition.ConditionChange -= OnConditionChange;
 		Services.Framework.Update -= CombatFrameworkTick;
-		if (GetMouseLimit()) SetMouseLimit(false);
+		SetMouseLimit(false);
 	}
 
 	private static void OnConditionChange(ConditionFlag flag, bool value)
 	{
 		if (flag != ConditionFlag.InCombat) return;
+		Services.Framework.Update -= CombatFrameworkTick;
 		if (value)
 		{
 			Services.Framework.Update += CombatFrameworkTick;
 		}
 		else
 		{
-			Services.Framework.Update -= CombatFrameworkTick;
-			Services.Framework.Update += PostCombatCleanupTick;
+			Services.Framework.RunOnTick(() => { SetMouseLimit(false); });
 		}
 	}
 
-	private static void CombatFrameworkTick(IFramework framework)
+	private static void CombatFrameworkTick(IFramework _)
 	{
-		var shouldLock = ShouldLockMouse();
-		if (shouldLock == GetMouseLimit()) return;
-		SetMouseLimit(shouldLock);
-	}
-
-	private static void PostCombatCleanupTick(IFramework framework)
-	{
-		if (GetMouseLimit()) SetMouseLimit(false);
-		framework.Update -= PostCombatCleanupTick;
+		SetMouseLimit(ShouldLockMouse());
 	}
 
 	private static bool ShouldLockMouse()
