@@ -9,4 +9,4 @@ tags:
 category_tags:
   - Utility
 changelog: |-
-  - Fixes for log spam and cursor being locked when alt+tabbed due to recent Dalamud changes.
+  - Update for 7.0

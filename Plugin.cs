@@ -12,7 +12,7 @@ internal sealed class Plugin : IDalamudPlugin
 
 	private readonly WindowSystem _windowSystem;
 
-	public Plugin(DalamudPluginInterface pluginInterface)
+	public Plugin(IDalamudPluginInterface pluginInterface)
 	{
 		pluginInterface.Create<Services>();
 
