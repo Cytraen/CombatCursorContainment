@@ -93,6 +93,6 @@ internal static class MouseLock
 
 	private static bool IsCraftingJob()
 	{
-		return Services.ClientState.LocalPlayer?.ClassJob.GameData?.Role == 0;
+		return Services.ClientState.LocalPlayer?.ClassJob.Value.Role == 0;
 	}
 }
