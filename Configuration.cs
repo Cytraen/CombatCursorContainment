@@ -15,6 +15,8 @@ public class Configuration : IPluginConfiguration
 
 	public bool DoNotLockDuringCutscene { get; set; } = false;
 
+	public bool DoNotLockDuringTransition { get; set; } = false;
+
 	public bool DoNotLockIfWeaponSheathed { get; set; } = false;
 
 	public bool DoNotLockIfMounted { get; set; } = false;

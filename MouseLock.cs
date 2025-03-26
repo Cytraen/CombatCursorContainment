@@ -14,7 +14,8 @@ internal static class MouseLock
 
 	internal static void SetMouseLimit(bool value)
 	{
-		if (GetMouseLimit() == value) return;
+		if (GetMouseLimit() == value)
+			return;
 		Services.PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
 		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value);
 	}
@@ -34,15 +35,21 @@ internal static class MouseLock
 
 	private static void OnConditionChange(ConditionFlag flag, bool value)
 	{
-		if (flag != ConditionFlag.InCombat) return;
+		if (flag != ConditionFlag.InCombat)
+			return;
+
 		Services.Framework.Update -= CombatFrameworkTick;
+
 		if (value)
 		{
 			Services.Framework.Update += CombatFrameworkTick;
 		}
 		else
 		{
-			Services.Framework.RunOnTick(() => { SetMouseLimit(false); });
+			Services.Framework.RunOnTick(() =>
+			{
+				SetMouseLimit(false);
+			});
 		}
 	}
 
@@ -53,19 +60,33 @@ internal static class MouseLock
 
 	private static bool ShouldLockMouse()
 	{
-		if (Services.Config.DoNotLockDuringCutscene && IsInCutscene()) return false;
-		if (Services.Config.DoNotLockIfDead && IsDead()) return false;
-		if (Services.Config.DoNotLockIfOutsideDuty && !IsInDuty()) return false;
-		if (Services.Config.DoNotLockIfWeaponSheathed && !IsWeaponOut()) return false;
-		if (Services.Config.DoNotLockIfMounted && IsMounted()) return false;
-		if (Services.Config.DoNotLockIfGathererCrafter && IsCraftingJob()) return false;
+		if (Services.Config.DoNotLockDuringCutscene && IsInCutscene())
+			return false;
+		if (Services.Config.DoNotLockDuringTransition && IsInTransition())
+			return false;
+		if (Services.Config.DoNotLockIfDead && IsDead())
+			return false;
+		if (Services.Config.DoNotLockIfOutsideDuty && !IsInDuty())
+			return false;
+		if (Services.Config.DoNotLockIfWeaponSheathed && !IsWeaponOut())
+			return false;
+		if (Services.Config.DoNotLockIfMounted && IsMounted())
+			return false;
+		if (Services.Config.DoNotLockIfGathererCrafter && IsCraftingJob())
+			return false;
 		return true;
 	}
 
 	private static bool IsInCutscene()
 	{
 		return Services.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-			   || Services.Condition[ConditionFlag.WatchingCutscene];
+			|| Services.Condition[ConditionFlag.WatchingCutscene];
+	}
+
+	private static bool IsInTransition()
+	{
+		// Occupied in combat, thanks to EngageTimer
+		return Services.Condition[ConditionFlag.Occupied38];
 	}
 
 	private static bool IsDead()
@@ -86,9 +107,9 @@ internal static class MouseLock
 	private static bool IsMounted()
 	{
 		return Services.Condition[ConditionFlag.Mounted]
-			   || Services.Condition[ConditionFlag.Mounted2]
-			   || Services.Condition[ConditionFlag.Mounting]
-			   || Services.Condition[ConditionFlag.Mounting71];
+			|| Services.Condition[ConditionFlag.Mounted2]
+			|| Services.Condition[ConditionFlag.Mounting]
+			|| Services.Condition[ConditionFlag.Mounting71];
 	}
 
 	private static bool IsCraftingJob()

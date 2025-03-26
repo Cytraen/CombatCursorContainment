@@ -1,5 +1,4 @@
 using CombatCursorContainment.Windows;
-using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 
@@ -9,30 +8,35 @@ internal sealed class Plugin : IDalamudPlugin
 {
 	private const string ConfigWindowCommandName = "/ccc";
 	private readonly ConfigWindow _configWindow;
-
 	private readonly WindowSystem _windowSystem;
 
 	public Plugin(IDalamudPluginInterface pluginInterface)
 	{
 		pluginInterface.Create<Services>();
 
-		Services.Config = Services.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+		Services.Config =
+			Services.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
-		_configWindow = new ConfigWindow();
-		_windowSystem = new WindowSystem("CombatCursorContainment");
+		_configWindow = new();
+		_windowSystem = new("CombatCursorContainment");
 		_windowSystem.AddWindow(_configWindow);
 
-		Services.CommandManager.AddHandler(ConfigWindowCommandName, new CommandInfo(OnConfigWindowCommand)
-		{
-			HelpMessage = "Opens the Combat Cursor Containment config window." +
-						  "\n/ccc <enable|on|1> → Enables locking cursor during combat." +
-						  "\n/ccc <disable|off|0> → Disables locking cursor during combat."
-		});
+		Services.CommandManager.AddHandler(
+			ConfigWindowCommandName,
+			new(OnConfigWindowCommand)
+			{
+				HelpMessage =
+					"Opens the Combat Cursor Containment config window."
+					+ "\n/ccc <enable|on|1> → Enables locking cursor during combat."
+					+ "\n/ccc <disable|off|0> → Disables locking cursor during combat.",
+			}
+		);
 
 		Services.PluginInterface.UiBuilder.Draw += DrawUi;
 		Services.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUi;
 
-		if (Services.Config.EnableLocking) MouseLock.EnableMouseAutoLock();
+		if (Services.Config.EnableLocking)
+			MouseLock.EnableMouseAutoLock();
 	}
 
 	public void Dispose()
@@ -55,7 +59,9 @@ internal sealed class Plugin : IDalamudPlugin
 				DrawConfigUi();
 				break;
 
-			case "enable" or "on" or "1":
+			case "enable"
+			or "on"
+			or "1":
 				if (Services.Config.EnableLocking)
 				{
 					Services.ChatGui.Print("Combat Cursor Containment was already enabled.");
@@ -70,7 +76,9 @@ internal sealed class Plugin : IDalamudPlugin
 
 				break;
 
-			case "disable" or "off" or "0":
+			case "disable"
+			or "off"
+			or "0":
 				if (Services.Config.EnableLocking)
 				{
 					Services.ChatGui.Print("Combat Cursor Containment now disabled.");
