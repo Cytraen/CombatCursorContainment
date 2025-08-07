@@ -4,6 +4,8 @@ using Dalamud.Plugin;
 
 namespace CombatCursorContainment;
 
+// ReSharper disable once ClassNeverInstantiated.Global
+// ReSharper disable once UnusedType.Global
 internal sealed class Plugin : IDalamudPlugin
 {
 	private const string ConfigWindowCommandName = "/ccc";
@@ -14,11 +16,10 @@ internal sealed class Plugin : IDalamudPlugin
 	{
 		pluginInterface.Create<Services>();
 
-		Services.Config =
-			Services.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+		Services.Config = Configuration.Load();
 
-		_configWindow = new();
-		_windowSystem = new("CombatCursorContainment");
+		_configWindow = new ConfigWindow();
+		_windowSystem = new WindowSystem("CombatCursorContainment");
 		_windowSystem.AddWindow(_configWindow);
 
 		Services.CommandManager.AddHandler(
@@ -44,7 +45,6 @@ internal sealed class Plugin : IDalamudPlugin
 		MouseLock.DisableMouseAutoLock();
 
 		_windowSystem.RemoveAllWindows();
-		_configWindow.Dispose();
 		Services.CommandManager.RemoveHandler(ConfigWindowCommandName);
 
 		Services.PluginInterface.UiBuilder.Draw -= DrawUi;

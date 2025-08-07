@@ -9,7 +9,7 @@ internal static class MouseLock
 {
 	internal static bool GetMouseLimit()
 	{
-		return Services.GameConfig.System.GetBool(SystemConfigOption.MouseOpeLimit.ToString());
+		return Services.GameConfig.System.GetBool(nameof(SystemConfigOption.MouseOpeLimit));
 	}
 
 	internal static void SetMouseLimit(bool value)
@@ -17,7 +17,7 @@ internal static class MouseLock
 		if (GetMouseLimit() == value)
 			return;
 		Services.PluginLog.Debug($"Toggled mouse lock {(value ? "on" : "off")}");
-		Services.GameConfig.System.Set(SystemConfigOption.MouseOpeLimit.ToString(), value);
+		Services.GameConfig.System.Set(nameof(SystemConfigOption.MouseOpeLimit), value);
 	}
 
 	internal static void EnableMouseAutoLock()
@@ -107,7 +107,7 @@ internal static class MouseLock
 	private static bool IsMounted()
 	{
 		return Services.Condition[ConditionFlag.Mounted]
-			|| Services.Condition[ConditionFlag.Mounted2]
+			|| Services.Condition[ConditionFlag.RidingPillion]
 			|| Services.Condition[ConditionFlag.Mounting]
 			|| Services.Condition[ConditionFlag.Mounting71];
 	}

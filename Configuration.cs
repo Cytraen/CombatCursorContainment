@@ -1,12 +1,9 @@
-using Dalamud.Configuration;
+using System.Text.Json;
 
 namespace CombatCursorContainment;
 
-[Serializable]
-public class Configuration : IPluginConfiguration
+public sealed class Configuration
 {
-	public int Version { get; set; } = 0;
-
 	public bool EnableLocking { get; set; } = true;
 
 	public bool DoNotLockIfDead { get; set; } = false;
@@ -23,8 +20,25 @@ public class Configuration : IPluginConfiguration
 
 	public bool DoNotLockIfGathererCrafter { get; set; } = false;
 
+	public static Configuration Load()
+	{
+		if (!File.Exists(Services.PluginInterface.ConfigFile.FullName))
+		{
+			return new Configuration();
+		}
+
+		var bytes = File.ReadAllBytes(Services.PluginInterface.ConfigFile.FullName);
+		return JsonSerializer.Deserialize<Configuration>(bytes) ?? new Configuration();
+	}
+
+	public static void Save(Configuration config)
+	{
+		config.Save();
+	}
+
 	public void Save()
 	{
-		Services.PluginInterface.SavePluginConfig(this);
+		var str = JsonSerializer.Serialize(this);
+		File.WriteAllText(Services.PluginInterface.ConfigFile.FullName, str);
 	}
 }

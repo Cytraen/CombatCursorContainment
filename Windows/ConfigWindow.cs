@@ -1,13 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
 
 namespace CombatCursorContainment.Windows;
 
-[SuppressMessage("ReSharper", "AssignmentInConditionalExpression")]
-internal class ConfigWindow : Window, IDisposable
+internal sealed class ConfigWindow : Window
 {
 	internal ConfigWindow()
 		: base(
@@ -18,11 +17,7 @@ internal class ConfigWindow : Window, IDisposable
 		Size = new Vector2(0, 0);
 	}
 
-	public void Dispose()
-	{
-		GC.SuppressFinalize(this);
-	}
-
+	[SuppressMessage("ReSharper", "AssignmentInConditionalExpression")]
 	public override void Draw()
 	{
 		var changed = false;

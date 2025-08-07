@@ -1,14 +1,16 @@
-<Project Sdk="Dalamud.NET.Sdk/12.0.2">
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Authors>Cytraen</Authors>
-		<VersionPrefix>1.0.6</VersionPrefix>
+		<Version>1.0.7</Version>
 		<RepositoryUrl>https://github.com/Cytraen/CombatCursorContainment/</RepositoryUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+		<Use_Dalamud_Newtonsoft_Json>false</Use_Dalamud_Newtonsoft_Json>
 	</PropertyGroup>
-
-	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
-		<None Update="icon.png" CopyToOutputDirectory="PreserveNewest" TargetPath="images\%(Filename)%(Extension)" />
-	</ItemGroup>
+	<Target
+		Name="CopyIconToDebugOutput"
+		AfterTargets="Build"
+		Condition="'$(Configuration)' == 'Debug'"
+	>
+		<Copy SourceFiles="icon.png" DestinationFolder="$(OutDir)/images/" />
+	</Target>
 </Project>
